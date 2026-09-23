@@ -1,3 +1,10 @@
+/bin
+/build
+/tmp
+.DS_STORE
+.cache/
+.ccls-cache/
+
 # Prerequisites
 *.d
 
