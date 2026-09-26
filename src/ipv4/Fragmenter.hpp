@@ -1,0 +1,4 @@
+#ifndef FRAGMENTER_HPP
+#define FRAGMENTER_HPP
+
+#endif // FRAGMENTER_HPP

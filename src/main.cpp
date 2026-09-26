@@ -1,10 +1,10 @@
 
 #include <iostream>
-#include "Demuxer.hpp"
-#include "TunDevice.hpp"
-#include "Ipv4Header.hpp"
-#include "Router.hpp"
-#include "Reassembler.hpp"
+#include "ipv4/Ipv4Input.hpp"
+#include "ipv4/Ipv4Output.hpp"
+#include "tun/TunDevice.hpp"
+#include "routing/Router.hpp"
+#include "ipv4/Reassembler.hpp"
 
 int main() {
 	std::cout << "hi" << std::endl;
@@ -14,6 +14,8 @@ int main() {
 	TunDevice tun{ "tun0" };
 	Router router;
 	Reassembler reassembler;
+	Ipv4Output output{ router, tun, local_address };
+	Ipv4Input input{ router, reassembler, output, local_address };
 
 	std::byte buf[2000];
 
@@ -24,36 +26,7 @@ int main() {
 
 		const std::span<const std::byte> packet{ buf, n };
 
-		const auto header = Ipv4Header::from_buffer(packet);
-		if (!header) continue; // Invalid packet
-
-		const bool reserved_bit = (header->flags & 0b100) != 0;
-		if (reserved_bit) continue; // Reserved bit should always be 0
-
-		const auto payload = packet.subspan(header->header_length(), header->total_length - header->header_length());
-
-		if (header->destination == local_address) {
-			// do fragment/Demuxer stuff
-			const bool more_fragments = (header->flags & 0b001) != 0;
-			const bool is_fragment = more_fragments || header->fragment_offset != 0;
-
-			if (is_fragment) {
-				const auto completed = reassembler.add_fragment(*header, payload);
-
-				if (!completed) continue;
-
-				Demuxer::dispatch(completed->header, completed->payload);
-			} else {
-				Demuxer::dispatch(*header, payload);
-			}
-
-		} else {
-			const auto route = router.lookup(header->destination);
-
-			if (!route) continue;
-
-			// Write to route
-		}
+		input.process(packet);
 	}
 
 	return 0;
