@@ -1,16 +1,42 @@
 #include "TunDevice.hpp"
-#include <ios>
+#include <cstddef>
+#include <system_error>
 
-ssize_t TunDevice::read(void *buf, std::size_t count) {
-	auto n = ::read(fd_, buf, count);
+ssize_t TunDevice::read(void *buf, std::size_t size) {
+	while (true) {
+		const ssize_t result = ::read(fd_, buf, size);
 
-	if (n < 0) {
+		if (result >= 0) {
+			return result;
+		}
+
+		if (errno == EINTR) {
+			continue;
+		}
+
 		throw std::system_error(
 			errno,
-			std::iostream_category(),
-			"failed to read tun device");
-	} else {
-		return n;
+			std::generic_category(),
+			"failed to read TUN device");
+	}
+}
+
+ssize_t TunDevice::write(const void *buf, std::size_t size) {
+	while (true) {
+		const ssize_t result = ::write(fd_, buf, size);
+
+		if (result >= 0) {
+			return result;
+		}
+
+		if (errno == EINTR) {
+			continue;
+		}
+
+		throw std::system_error(
+			errno,
+			std::generic_category(),
+			"failed to write TUN device");
 	}
 }
 

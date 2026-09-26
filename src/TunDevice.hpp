@@ -22,6 +22,8 @@ class TunDevice {
 	// Throws system error on fail
 	ssize_t read(void *buf, std::size_t count);
 
+	ssize_t write(const void *buf, std::size_t count);
+
 	[[nodiscard]] int fd() const;
 
 	~TunDevice();

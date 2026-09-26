@@ -1,43 +1,33 @@
 #ifndef IP_HEADER_HPP
 #define IP_HEADER_HPP
 
-#include "PackedStruct.hpp"
+#include <cstddef>
 #include <cstdint>
-#include <linux/if_tun.h>
-#include <span>
 #include <optional>
+#include <span>
 
-PACKED_STRUCT(IpHeader) {
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-	std::uint8_t ihl : 4;	  // Header length
-	std::uint8_t version : 4; // Version
+class IpHeader {
+  public:
+	static constexpr std::size_t minimum_wire_size = 20;
 
-#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-	std::uint8_t version : 4; // Version
-	std::uint8_t ihl : 4;	  // Header length
-#endif
-
-	std::uint8_t tos; // Type of service
+	std::uint8_t version;
+	std::uint8_t ihl;
+	std::uint8_t tos;
 	std::uint16_t total_length;
 	std::uint16_t id;
-
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-	std::uint16_t frag_offset : 13; // Fragment Offset (13 bits)
-	std::uint16_t flags : 3;		// Flags (3 bits)
-#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-	uint16_t flags : 3;		   // Flags (3 bits)
-	uint16_t frag_offset : 13; // Fragment Offset (13 bits)
-#endif
-
-	std::uint8_t ttl; // Time to live
+	std::uint8_t flags;
+	std::uint16_t fragment_offset;
+	std::uint8_t ttl;
 	std::uint8_t protocol;
 	std::uint16_t checksum;
-	std::uint32_t src_ip;
-	std::uint32_t dest_ip;
+	std::uint32_t source;
+	std::uint32_t destination;
 
-	static std::optional<IpHeader> from_buf(std::span<const std::byte> buf) {
-		return std::nullopt;
+	[[nodiscard]] std::size_t header_length() const {
+		return ihl * 4;
 	}
+
+	static std::optional<IpHeader> from_buffer(std::span<const std::byte> buf);
 };
 
-#endif // IP_HEADER_HPP
+#endif
