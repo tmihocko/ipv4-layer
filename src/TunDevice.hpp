@@ -18,11 +18,9 @@ class TunDevice {
   public:
 	explicit TunDevice(const char *device_name);
 
-	// Read from file descriptor
-	// Throws system error on fail
-	ssize_t read(void *buf, std::size_t count);
+	std::size_t read(void *buf, std::size_t count);
 
-	ssize_t write(const void *buf, std::size_t count);
+	std::size_t write(const void *buf, std::size_t count);
 
 	[[nodiscard]] int fd() const;
 

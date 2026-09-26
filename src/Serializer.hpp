@@ -1,8 +1,8 @@
 /**
-TODO:!
 
-Fix endianness of serialized bytes
-*/
+Taken from another project I did
+
+ */
 #ifndef SERIALIZER_HPP
 #define SERIALIZER_HPP
 #include <chrono>

@@ -1,8 +1,7 @@
 
 #include <iostream>
 #include "TunDevice.hpp"
-#include "IpHeader.hpp"
-#include <span>
+#include "Ipv4Header.hpp"
 
 int main() {
 	std::cout << "hi" << std::endl;
@@ -15,7 +14,7 @@ int main() {
 
 		if (n == 0) continue;
 
-		auto header = IpHeader::from_buf(std::span<const std::byte>{ buf, static_cast<std::size_t>(n) });
+		auto header = Ipv4Header::from_buffer(buf, n);
 
 		if (!header) continue; // Invalid packet
 	}

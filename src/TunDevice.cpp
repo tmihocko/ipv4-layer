@@ -1,13 +1,14 @@
 #include "TunDevice.hpp"
 #include <cstddef>
+#include <stdexcept>
 #include <system_error>
 
-ssize_t TunDevice::read(void *buf, std::size_t size) {
+std::size_t TunDevice::read(void *buf, std::size_t size) {
 	while (true) {
 		const ssize_t result = ::read(fd_, buf, size);
 
 		if (result >= 0) {
-			return result;
+			return static_cast<std::size_t>(result);
 		}
 
 		if (errno == EINTR) {
@@ -21,22 +22,28 @@ ssize_t TunDevice::read(void *buf, std::size_t size) {
 	}
 }
 
-ssize_t TunDevice::write(const void *buf, std::size_t size) {
+std::size_t TunDevice::write(const void *buf, std::size_t size) {
 	while (true) {
 		const ssize_t result = ::write(fd_, buf, size);
 
-		if (result >= 0) {
-			return result;
+		if (result < 0) {
+			if (errno == EINTR) {
+				continue;
+			}
+
+			throw std::system_error(
+				errno,
+				std::generic_category(),
+				"failed to write TUN device");
 		}
 
-		if (errno == EINTR) {
-			continue;
+		const auto written = static_cast<std::size_t>(result);
+
+		if (written != size) {
+			throw std::runtime_error("short write to TUN device");
 		}
 
-		throw std::system_error(
-			errno,
-			std::generic_category(),
-			"failed to write TUN device");
+		return written;
 	}
 }
 

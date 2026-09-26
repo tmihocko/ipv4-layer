@@ -6,7 +6,7 @@
 #include <optional>
 #include <span>
 
-class IpHeader {
+class Ipv4Header {
   public:
 	static constexpr std::size_t minimum_wire_size = 20;
 
@@ -27,7 +27,11 @@ class IpHeader {
 		return ihl * 4;
 	}
 
-	static std::optional<IpHeader> from_buffer(std::span<const std::byte> buf);
+	static std::uint16_t get_checksum(const std::byte *buffer, std::size_t n);
+	static std::uint16_t get_checksum(std::span<const std::byte> header_bytes);
+
+	static std::optional<Ipv4Header> from_buffer(const std::byte *buffer, std::size_t n);
+	static std::optional<Ipv4Header> from_buffer(std::span<const std::byte> buffer);
 };
 
 #endif
