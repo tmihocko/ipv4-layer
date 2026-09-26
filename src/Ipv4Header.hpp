@@ -6,6 +6,11 @@
 #include <optional>
 #include <span>
 
+/**
+Not actually 20 bytes, separates smaller fields
+
+Handles checksum on construction
+*/
 class Ipv4Header {
   public:
 	static constexpr std::size_t minimum_wire_size = 20;

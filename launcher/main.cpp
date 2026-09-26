@@ -2,8 +2,6 @@
 #include <iostream>
 #include <string>
 
-namespace {
-
 std::string shellQuote(const std::string &value) {
 	std::string result = "'";
 
@@ -17,8 +15,6 @@ std::string shellQuote(const std::string &value) {
 
 	return result + "'";
 }
-
-} // namespace
 
 int main() {
 	std::cout << "Building Docker image...\n";
@@ -34,14 +30,13 @@ int main() {
 
 	std::cout << "Starting IPv4 stack container...\n";
 
-	const int run_result =
-		std::system(
-			"docker run "
-			"--init "
-			"--rm "
-			"--cap-add=NET_ADMIN "
-			"--device=/dev/net/tun "
-			"ipv4-stack");
+	const int run_result = std::system(
+		"docker run "
+		"--init "
+		"--rm "
+		"--cap-add=NET_ADMIN "
+		"--device=/dev/net/tun "
+		"ipv4-stack");
 
 	if (run_result != 0) {
 		std::cerr << "Docker container exited with an error.\n";

@@ -1,5 +1,5 @@
-#ifndef DISPATCHER_HPP
-#define DISPATCHER_HPP
+#ifndef DEMUXER_HPP
+#define DEMUXER_HPP
 
 #include "Ipv4Header.hpp"
 #include <cstddef>
@@ -14,4 +14,4 @@ void handle_udp(const Ipv4Header &header, std::span<const std::byte> payload);
 
 } // namespace Demuxer
 
-#endif // DISPATCHER_HPP
+#endif // DEMUXER_HPP

@@ -12,6 +12,7 @@ Taken from another project I did
 #include <string>
 #include <type_traits>
 #include <vector>
+#include <cstring>
 
 template <typename T>
 concept BinarySerializable =
