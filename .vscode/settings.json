@@ -11,5 +11,12 @@
 		"${env:HOME}/.cache/ipv4-linux-uapi"
 	],
 
+	"clangd.fallbackFlags": [
+		"-std=c++23",
+		"-I/Users/tristan/Documents/Github/ipv4-stack/src",
+		"-I/Users/tristan/.cache/ipv4-linux-uapi"
+	],
+	"C_Cpp.intelliSenseEngine": "disabled",
+
 	"C_Cpp.default.cppStandard": "c++23"
 }

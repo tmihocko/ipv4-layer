@@ -1,9 +1,11 @@
-#ifndef HEADER_HPP
-#define HEADER_HPP
+#ifndef IP_HEADER_HPP
+#define IP_HEADER_HPP
 
 #include "PackedStruct.hpp"
 #include <cstdint>
 #include <linux/if_tun.h>
+#include <span>
+#include <optional>
 
 PACKED_STRUCT(IpHeader) {
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
@@ -32,6 +34,10 @@ PACKED_STRUCT(IpHeader) {
 	std::uint16_t checksum;
 	std::uint32_t src_ip;
 	std::uint32_t dest_ip;
+
+	static std::optional<IpHeader> from_buf(std::span<const std::byte> buf) {
+		return std::nullopt;
+	}
 };
 
-#endif // HEADER_HPP
+#endif // IP_HEADER_HPP

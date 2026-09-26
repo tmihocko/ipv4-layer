@@ -4,6 +4,7 @@
 .DS_STORE
 .cache/
 .ccls-cache/
+.clangd
 
 # Prerequisites
 *.d
