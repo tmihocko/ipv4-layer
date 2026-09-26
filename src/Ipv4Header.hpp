@@ -1,5 +1,5 @@
-#ifndef IP_HEADER_HPP
-#define IP_HEADER_HPP
+#ifndef IPV4_HEADER_HPP
+#define IPV4_HEADER_HPP
 
 #include <cstddef>
 #include <cstdint>
