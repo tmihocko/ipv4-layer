@@ -1,9 +1,8 @@
 #include "Ipv4Input.hpp"
+#include "protocols/Demuxer.hpp"
 
-Ipv4Input::Ipv4Input(Router &router, Reassembler &reassembler, Ipv4Output &output, std::uint32_t local_address)
-	: router_(router), reassembler_(reassembler), output_(output), local_address_(local_address) {}
-
-//
+Ipv4Input::Ipv4Input(Reassembler &reassembler, Ipv4Output &output, std::uint32_t local_address)
+	: reassembler_(reassembler), output_(output), local_address_(local_address) {}
 
 void Ipv4Input::process(std::span<const std::byte> packet) {
 	const auto header = Ipv4Header::from_buffer(packet);
@@ -30,10 +29,6 @@ void Ipv4Input::process(std::span<const std::byte> packet) {
 		}
 
 	} else {
-		const auto route = router_.lookup(header->destination);
-
-		if (!route) return;
-
-		// Write to route
+		output_.forward(*header, payload);
 	}
 }

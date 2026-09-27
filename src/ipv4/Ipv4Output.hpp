@@ -16,8 +16,13 @@ class Ipv4Output {
 	void forward(Ipv4Header header, std::span<const std::byte> payload);
 
   private:
+	// Actually sends the packet
+	void transmit(Ipv4Header header, std::span<const std::byte> payload);
+
 	Router &router_;
-	TunDevice &device_;
+	TunDevice &tun_;
 	std::uint32_t local_address_;
+
+	std::uint16_t next_id_ = 0;
 };
 #endif // IPV4OUTPUT_HPP

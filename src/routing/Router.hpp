@@ -6,19 +6,19 @@
 #include <optional>
 #include <vector>
 
-using IPv4Address = uint32_t;
+using IPv4Address = std::uint32_t;
 
 struct Route {
 	IPv4Address network;
-	IPv4Address netmask;
+	std::uint8_t prefix_length; // 0-32
+	IPv4Address gateway;		// zero means directly connected
 
-	// 0 can mean "directly connected"
-	IPv4Address gateway;
+	std::size_t mtu;
 };
 
 class Router {
   public:
-	void add_route(const Route &route);
+	void add_route(Route route);
 
 	std::optional<Route> lookup(IPv4Address destination);
 

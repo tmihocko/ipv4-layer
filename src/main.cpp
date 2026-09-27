@@ -15,7 +15,14 @@ int main() {
 	Router router;
 	Reassembler reassembler;
 	Ipv4Output output{ router, tun, local_address };
-	Ipv4Input input{ router, reassembler, output, local_address };
+	Ipv4Input input{ reassembler, output, local_address };
+
+	router.add_route({
+		.network = 0,
+		.prefix_length = 0,
+		.gateway = 0x0A000001, // 10.0.0.1
+		.mtu = 1500,
+	});
 
 	std::byte buf[2000];
 

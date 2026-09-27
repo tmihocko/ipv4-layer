@@ -42,7 +42,7 @@ std::optional<Ipv4Header> Ipv4Header::from_buffer(std::span<const std::byte> buf
 	header.ihl = first & 0x0F;
 
 	if (header.version != 4 ||
-		header.ihl < 5 ||
+		header.ihl != 5 ||
 		buffer.size() < header.header_length()) {
 		return std::nullopt;
 	}
