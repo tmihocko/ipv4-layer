@@ -1,7 +1,7 @@
 #include "Ipv4Input.hpp"
 #include "protocols/Demuxer.hpp"
 
-Ipv4Input::Ipv4Input(Reassembler &reassembler, Ipv4Output &output, std::uint32_t local_address)
+Ipv4Input::Ipv4Input(Reassembler &reassembler, Ipv4Output &output, IPv4Address local_address)
 	: reassembler_(reassembler), output_(output), local_address_(local_address) {}
 
 void Ipv4Input::process(std::span<const std::byte> packet) {

@@ -7,7 +7,7 @@
 #include <vector>
 #include <utility>
 
-std::optional<ReassembledPacket>
+std::optional<Packet>
 Reassembler::add_fragment(const Ipv4Header &header, std::span<const std::byte> buffer) {
 	const ReassemblerKey key{
 		.source = header.source,
@@ -127,7 +127,7 @@ Reassembler::add_fragment(const Ipv4Header &header, std::span<const std::byte> b
 
 	completed_header.checksum = 0; // Just marks as unused/unimportant
 
-	ReassembledPacket completed{
+	Packet completed{
 		.header = completed_header,
 		.payload = std::move(payload),
 	};

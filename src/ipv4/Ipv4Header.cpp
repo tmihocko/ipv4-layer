@@ -1,4 +1,5 @@
 #include "Ipv4Header.hpp"
+#include "ipv4/Ipv4Address.hpp"
 #include "util/BinaryReader.hpp"
 #include <cstddef>
 #include <cstdint>
@@ -66,8 +67,8 @@ std::optional<Ipv4Header> Ipv4Header::from_buffer(std::span<const std::byte> buf
 	header.ttl = reader.read<std::uint8_t>();
 	header.protocol = reader.read<std::uint8_t>();
 	header.checksum = reader.read<std::uint16_t>();
-	header.source = reader.read<std::uint32_t>();
-	header.destination = reader.read<std::uint32_t>();
+	header.source = IPv4Address{ reader.read<std::uint32_t>() };
+	header.destination = IPv4Address{ reader.read<std::uint32_t>() };
 
 	if (header.total_length < header.header_length() || header.total_length > buffer.size()) {
 		return std::nullopt;

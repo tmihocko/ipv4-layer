@@ -4,9 +4,8 @@
 #include <cstddef>
 #include <cstdint>
 #include <optional>
+#include "ipv4//Ipv4Address.hpp"
 #include <vector>
-
-using IPv4Address = std::uint32_t;
 
 struct Route {
 	IPv4Address network;

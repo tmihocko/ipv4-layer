@@ -7,20 +7,15 @@
 #include <optional>
 #include <vector>
 
-struct ReassembledPacket {
-	Ipv4Header header;
-	std::vector<std::byte> payload;
-};
-
 class Reassembler {
   public:
 	// Returns packet when all fragments are present
-	std::optional<ReassembledPacket> add_fragment(const Ipv4Header &header, std::span<const std::byte> buffer);
+	std::optional<Packet> add_fragment(const Ipv4Header &header, std::span<const std::byte> buffer);
 
   private:
 	struct ReassemblerKey {
-		std::uint32_t source;
-		std::uint32_t destination;
+		IPv4Address source;
+		IPv4Address destination;
 		std::uint8_t protocol;
 		std::uint16_t id;
 

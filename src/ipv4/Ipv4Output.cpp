@@ -3,10 +3,10 @@
 #include "util/BinaryWriter.hpp"
 #include <cstdint>
 
-Ipv4Output::Ipv4Output(Router &router, TunDevice &tun, std::uint32_t local_address)
+Ipv4Output::Ipv4Output(Router &router, TunDevice &tun, IPv4Address local_address)
 	: router_(router), tun_(tun), local_address_(local_address) {}
 
-void Ipv4Output::send(std::uint32_t destination, std::uint8_t protocol, std::span<const std::byte> payload) {
+void Ipv4Output::send(IPv4Address destination, std::uint8_t protocol, std::span<const std::byte> payload) {
 	if (payload.size() > UINT16_MAX - Ipv4Header::minimum_wire_size) {
 		return;
 	}
@@ -76,7 +76,7 @@ void Ipv4Output::transmit(Ipv4Header header, std::span<const std::byte> payload)
 		(header.fragment_offset & 0x1FFF));
 
 	writer.write<std::uint8_t, std::uint8_t, std::uint16_t, std::uint32_t, std::uint32_t>(
-		header.ttl, header.protocol, header.checksum, header.source, header.destination);
+		header.ttl, header.protocol, header.checksum, header.source.raw(), header.destination.raw());
 
 	auto packet = writer.move_data();
 

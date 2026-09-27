@@ -17,7 +17,10 @@ void Router::add_route(Route route) {
 	}
 
 	const auto mask = prefix_mask(route.prefix_length);
-	route.network &= mask;
+
+	route.network = IPv4Address{
+		route.network.raw() & mask
+	};
 
 	routes_.push_back(route);
 }
@@ -28,7 +31,7 @@ std::optional<Route> Router::lookup(IPv4Address destination) {
 	for (const auto &route : routes_) {
 		const auto mask = prefix_mask(route.prefix_length);
 
-		if ((destination & mask) != route.network) {
+		if ((destination.raw() & mask) != route.network.raw()) {
 			continue;
 		}
 

@@ -1,10 +1,12 @@
 #ifndef IPV4_HEADER_HPP
 #define IPV4_HEADER_HPP
 
+#include "ipv4/Ipv4Address.hpp"
 #include <cstddef>
 #include <cstdint>
 #include <optional>
 #include <span>
+#include <vector>
 
 /**
 Not actually 20 bytes, separates smaller fields
@@ -25,8 +27,8 @@ class Ipv4Header {
 	std::uint8_t ttl;
 	std::uint8_t protocol;
 	std::uint16_t checksum;
-	std::uint32_t source;
-	std::uint32_t destination;
+	IPv4Address source;
+	IPv4Address destination;
 
 	[[nodiscard]] std::size_t header_length() const {
 		return ihl * 4;
@@ -37,6 +39,11 @@ class Ipv4Header {
 
 	static std::optional<Ipv4Header> from_buffer(const std::byte *buffer, std::size_t n);
 	static std::optional<Ipv4Header> from_buffer(std::span<const std::byte> buffer);
+};
+
+struct Packet {
+	Ipv4Header header;
+	std::vector<std::byte> payload;
 };
 
 #endif
