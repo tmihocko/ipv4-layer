@@ -34,9 +34,6 @@ class Ipv4Header {
 		return ihl * 4;
 	}
 
-	static std::uint16_t get_checksum(const std::byte *buffer, std::size_t n);
-	static std::uint16_t get_checksum(std::span<const std::byte> header_bytes);
-
 	static std::optional<Ipv4Header> from_buffer(const std::byte *buffer, std::size_t n);
 	static std::optional<Ipv4Header> from_buffer(std::span<const std::byte> buffer);
 };

@@ -4,26 +4,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <span>
-
-std::uint16_t Ipv4Header::get_checksum(const std::byte *buffer, std::size_t n) {
-	return get_checksum(std::span<const std::byte>{ buffer, n });
-}
-
-std::uint16_t Ipv4Header::get_checksum(std::span<const std::byte> header_bytes) {
-	BinaryReader reader{ header_bytes };
-	std::uint32_t sum = 0;
-
-	while (reader.remaining() >= sizeof(std::uint16_t)) {
-		sum += reader.read<std::uint16_t>();
-	}
-
-	// Fold carries back into the lower 16 bits.
-	while ((sum >> 16) != 0) {
-		sum = (sum & 0xFFFF) + (sum >> 16);
-	}
-
-	return static_cast<std::uint16_t>(~sum);
-}
+#include "util/Checksum.hpp"
 
 std::optional<Ipv4Header> Ipv4Header::from_buffer(const std::byte *buffer, std::size_t n) {
 	return from_buffer(std::span<const std::byte>{ buffer, n });
@@ -51,7 +32,7 @@ std::optional<Ipv4Header> Ipv4Header::from_buffer(std::span<const std::byte> buf
 	const auto header_bytes =
 		buffer.first(header.header_length());
 
-	if (get_checksum(header_bytes) != 0) {
+	if (!Checksum::valid(header_bytes)) {
 		return std::nullopt;
 	}
 

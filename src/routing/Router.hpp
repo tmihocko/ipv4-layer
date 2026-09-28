@@ -4,13 +4,12 @@
 #include <cstddef>
 #include <cstdint>
 #include <optional>
-#include "ipv4//Ipv4Address.hpp"
+#include "ipv4/Ipv4Address.hpp"
 #include <vector>
 
 struct Route {
 	IPv4Address network;
 	std::uint8_t prefix_length; // 0-32
-	IPv4Address gateway;		// zero means directly connected
 
 	std::size_t mtu;
 };

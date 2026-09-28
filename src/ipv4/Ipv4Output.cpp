@@ -1,6 +1,8 @@
 #include "Ipv4Output.hpp"
+#include "ipv4/Fragmenter.hpp"
 #include "ipv4/Ipv4Header.hpp"
 #include "util/BinaryWriter.hpp"
+#include "util/Checksum.hpp"
 #include <cstdint>
 
 Ipv4Output::Ipv4Output(Router &router, TunDevice &tun, IPv4Address local_address)
@@ -53,9 +55,14 @@ void Ipv4Output::transmit(Ipv4Header header, std::span<const std::byte> payload)
 		const bool dont_fragment = (header.flags & 0b010) != 0;
 		if (dont_fragment) {
 			// ICMP fragmentation needed
+			// Throw?
 			return;
 		} else {
-			// Do fragmentation
+			const auto fragments = Fragmenter::fragment(header, payload, route->mtu);
+
+			for (const auto &fragment : fragments) {
+				transmit(fragment.header, fragment.payload);
+			}
 
 			return;
 		}
@@ -80,7 +87,7 @@ void Ipv4Output::transmit(Ipv4Header header, std::span<const std::byte> payload)
 
 	auto packet = writer.move_data();
 
-	const auto checksum = Ipv4Header::get_checksum(packet);
+	const auto checksum = Checksum::compute(packet);
 
 	packet[10] = static_cast<std::byte>((checksum & 0xFF00) >> 8);
 	packet[11] = static_cast<std::byte>((checksum & 0x00FF));

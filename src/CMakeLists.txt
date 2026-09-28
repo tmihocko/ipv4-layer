@@ -7,6 +7,10 @@ add_executable(Ipv4Stack
     ${IPV4STACK_SOURCES}
 )
 
+target_include_directories(Ipv4Stack PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}"
+)
+
 target_compile_options(Ipv4Stack PRIVATE
     -Wall
     -Wextra

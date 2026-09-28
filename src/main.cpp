@@ -21,7 +21,6 @@ int main() {
 	router.add_route({
 		.network = IPv4Address{ "0.0.0.0" },
 		.prefix_length = 0,
-		.gateway = IPv4Address{ "10.0.0.1" }, // 10.0.0.1
 		.mtu = 1500,
 	});
 

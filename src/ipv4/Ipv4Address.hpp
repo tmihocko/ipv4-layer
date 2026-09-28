@@ -38,6 +38,13 @@ class IPv4Address {
 		return raw_;
 	}
 
+	[[nodiscard]] std::string to_string() const {
+		return std::to_string((raw_ >> 24) & 0xFF) + "." +
+			   std::to_string((raw_ >> 16) & 0xFF) + "." +
+			   std::to_string((raw_ >> 8) & 0xFF) + "." +
+			   std::to_string((raw_ >> 0) & 0xFF);
+	}
+
 	auto operator<=>(const IPv4Address &) const = default;
 
   private:
