@@ -6,7 +6,9 @@ IMAGE_NAME="ipv4-stack"
 
 case "$(uname -s)" in
 	Linux)
-		cmake --build "$BUILD_DIR" --target clean
+		cmake \
+			--build "$BUILD_DIR" \
+			--target clean
 		;;
 	Darwin) # MacOS
 		docker image rm "$IMAGE_NAME"

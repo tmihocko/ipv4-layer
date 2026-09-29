@@ -6,11 +6,13 @@ IMAGE_NAME="ipv4-stack"
 case "$(uname -s)" in
 	Linux)
 		cmake \
-			-S . \
-			-B build \
-			-DCMAKE_BUILD_TYPE=Debug \
+			-S "$ROOT_DIR" \
+			-B "$BUILD_DIR" \
+			-DCMAKE_BUILD_TYPE=Debug 
 	    
-		cmake --build "$BUILD_DIR" --parallel
+		cmake \
+			--build "$BUILD_DIR" \
+			--parallel
 		;;
 	Darwin) # MacOS
 		docker build \
