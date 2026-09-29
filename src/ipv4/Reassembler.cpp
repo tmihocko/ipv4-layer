@@ -1,6 +1,7 @@
 #include "Reassembler.hpp"
 #include "Ipv4Header.hpp"
 #include <algorithm>
+#include <chrono>
 #include <cstddef>
 #include <optional>
 #include <span>
@@ -9,6 +10,14 @@
 
 std::optional<Packet>
 Reassembler::add_fragment(const Ipv4Header &header, std::span<const std::byte> buffer) {
+	const auto now = std::chrono::steady_clock::now();
+
+	std::erase_if(
+		pending_packets,
+		[&](const auto &entry) {
+			return now - entry.second.created_at >= std::chrono::seconds(30);
+		});
+
 	const ReassemblerKey key{
 		.source = header.source,
 		.destination = header.destination,

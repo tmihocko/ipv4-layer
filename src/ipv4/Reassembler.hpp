@@ -6,6 +6,7 @@
 #include <map>
 #include <optional>
 #include <vector>
+#include <chrono>
 
 class Reassembler {
   public:
@@ -32,6 +33,8 @@ class Reassembler {
 		bool has_first_fragment = false;
 		std::optional<std::size_t> final_size;
 		std::vector<Fragment> fragments;
+
+		std::chrono::steady_clock::time_point created_at = std::chrono::steady_clock::now();
 	};
 
 	// (src_ip, dst_ip, protocol, identification) : header, payload

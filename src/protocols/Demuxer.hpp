@@ -8,7 +8,7 @@
 
 namespace Demuxer {
 
-void dispatch(const Ipv4Header &header, std::span<const std::byte> payload, Ipv4Output &output);
+void dispatch(const Ipv4Header &header, std::span<const std::byte> payload, std::span<const std::byte> packet, Ipv4Output &output);
 
 void handle_icmp(const Ipv4Header &header, std::span<const std::byte> payload, Ipv4Output &output);
 void handle_tcp(const Ipv4Header &header, std::span<const std::byte> payload);

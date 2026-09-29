@@ -23,9 +23,9 @@ void Ipv4Input::process(std::span<const std::byte> packet) {
 
 			if (!completed) return;
 
-			Demuxer::dispatch(completed->header, completed->payload, output_);
+			Demuxer::dispatch(completed->header, completed->payload, packet, output_);
 		} else {
-			Demuxer::dispatch(*header, payload, output_);
+			Demuxer::dispatch(*header, payload, packet, output_);
 		}
 
 	} else {
