@@ -14,12 +14,17 @@ Taken from another project I did
 #include <vector>
 #include <cstring>
 
+#ifndef BINSER
+#define BINSER
+
 template <typename T>
 concept BinarySerializable =
 	std::is_integral_v<T> ||
 	std::is_enum_v<T> ||
 	std::is_same_v<T, std::string> ||
 	std::is_same_v<T, std::chrono::system_clock::time_point>;
+
+#endif
 
 class BinaryReader {
   public:

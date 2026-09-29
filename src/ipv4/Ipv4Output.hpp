@@ -11,7 +11,7 @@ class Ipv4Output {
   public:
 	Ipv4Output(Router &router, TunDevice &device, IPv4Address local_address);
 
-	void send(IPv4Address destination, std::uint8_t protocol, std::span<const std::byte> payload);
+	void send(IPv4Address destination, Protocol protocol, std::span<const std::byte> payload);
 
 	void forward(Ipv4Header header, std::span<const std::byte> payload);
 

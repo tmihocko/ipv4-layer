@@ -1,9 +1,48 @@
 #include "Icmp.hpp"
 #include "IcmpHeader.hpp"
+#include "ipv4/Ipv4Header.hpp"
 #include "util/BinaryReader.hpp"
+#include "util/BinaryWriter.hpp"
 #include "util/Checksum.hpp"
 #include <iostream>
 #include <vector>
+
+static std::vector<std::byte> make_reply(std::span<const std::byte> payload) {
+	std::vector<std::byte> reply{ payload.begin(), payload.end() };
+
+	reply[0] = static_cast<std::byte>(IcmpType::EchoReply); // Set type
+	reply[1] = std::byte{ 0 };								// Code = 0
+
+	// Reset checksum bytes
+	reply[2] = std::byte{ 0 };
+	reply[3] = std::byte{ 0 };
+
+	const auto checksum = Checksum::compute(reply);
+
+	reply[2] = static_cast<std::byte>((checksum & 0xFF00) >> 8);
+	reply[3] = static_cast<std::byte>((checksum & 0x00FF) >> 0);
+
+	return reply;
+}
+
+static std::vector<std::byte> make_error(IcmpType type, std::uint8_t code, std::uint32_t ext_header, std::span<const std::byte> old_packet) {
+	BinaryWriter writer;
+
+	writer.write<std::uint8_t, std::uint8_t, std::uint16_t, std::uint32_t>(
+		static_cast<std::uint8_t>(type), code, 0, ext_header);
+
+	const auto quote_size = std::min(old_packet.size(), Ipv4Header::minimum_wire_size + 8);
+
+	writer.write_bytes(old_packet.first(quote_size));
+
+	auto message = writer.move_data();
+	const auto checksum = Checksum::compute(message);
+
+	message[2] = static_cast<std::byte>((checksum & 0x00FF) >> 8);
+	message[3] = static_cast<std::byte>((checksum & 0xFF00) >> 0);
+
+	return message;
+}
 
 void Icmp::handle(const Ipv4Header &ip_header, std::span<const std::byte> payload, Ipv4Output &output) {
 
@@ -25,9 +64,9 @@ void Icmp::handle(const Ipv4Header &ip_header, std::span<const std::byte> payloa
 		if (icmp_header.code != 0) {
 			return;
 		} else {
-			auto reply = Icmp::make_reply(payload);
+			auto reply = make_reply(payload);
 
-			output.send(ip_header.source, 1, reply);
+			output.send(ip_header.source, Protocol::ICMP, reply);
 		}
 		break;
 	case IcmpType::EchoReply:
@@ -65,20 +104,21 @@ void Icmp::handle(const Ipv4Header &ip_header, std::span<const std::byte> payloa
 	}
 }
 
-std::vector<std::byte> Icmp::make_reply(std::span<const std::byte> payload) {
-	std::vector<std::byte> reply{ payload.begin(), payload.end() };
+void Icmp::send_time_exceeded(const Ipv4Header &header, std::span<const std::byte> old_packet, Ipv4Output &output) {
 
-	reply[0] = static_cast<std::byte>(IcmpType::EchoReply); // Set type
-	reply[1] = std::byte{ 0 };								// Code = 0
+	const auto message = make_error(IcmpType::TimeExceeded, 0, 0, old_packet);
 
-	// Reset checksum bytes
-	reply[2] = std::byte{ 0 };
-	reply[3] = std::byte{ 0 };
+	output.send(header.source, Protocol::ICMP, message);
+}
 
-	const auto checksum = Checksum::compute(reply);
+void Icmp::send_destination_unreachable(const Ipv4Header &header, std::span<const std::byte> packet, std::uint8_t code, Ipv4Output &output) {
+	const auto message = make_error(IcmpType::DestinationUnreachable, code, 0, packet);
 
-	reply[2] = static_cast<std::byte>((checksum & 0xFF00) >> 8);
-	reply[3] = static_cast<std::byte>((checksum & 0x00FF) >> 0);
+	output.send(header.source, Protocol::ICMP, message);
+}
 
-	return reply;
+void Icmp::send_fragmentation_needed(const Ipv4Header &header, std::span<const std::byte> packet, std::uint16_t mtu, Ipv4Output &output) {
+	const auto message = make_error(IcmpType::DestinationUnreachable, 4, static_cast<std::uint32_t>(mtu), packet);
+
+	output.send(header.source, Protocol::ICMP, message);
 }

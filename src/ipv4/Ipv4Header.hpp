@@ -8,6 +8,12 @@
 #include <span>
 #include <vector>
 
+enum class Protocol : std::uint8_t {
+	ICMP = 1,
+	TCP = 6,
+	UDP = 17,
+};
+
 /**
 Not actually 20 bytes, separates smaller fields
 
@@ -25,7 +31,7 @@ class Ipv4Header {
 	std::uint8_t flags;
 	std::uint16_t fragment_offset;
 	std::uint8_t ttl;
-	std::uint8_t protocol;
+	Protocol protocol;
 	std::uint16_t checksum;
 	IPv4Address source;
 	IPv4Address destination;

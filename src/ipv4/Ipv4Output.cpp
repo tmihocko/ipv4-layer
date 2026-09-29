@@ -4,11 +4,12 @@
 #include "util/BinaryWriter.hpp"
 #include "util/Checksum.hpp"
 #include <cstdint>
+#include "protocols/icmp/Icmp.hpp"
 
 Ipv4Output::Ipv4Output(Router &router, TunDevice &tun, IPv4Address local_address)
 	: router_(router), tun_(tun), local_address_(local_address) {}
 
-void Ipv4Output::send(IPv4Address destination, std::uint8_t protocol, std::span<const std::byte> payload) {
+void Ipv4Output::send(IPv4Address destination, Protocol protocol, std::span<const std::byte> payload) {
 	if (payload.size() > UINT16_MAX - Ipv4Header::minimum_wire_size) {
 		return;
 	}
@@ -33,7 +34,7 @@ void Ipv4Output::send(IPv4Address destination, std::uint8_t protocol, std::span<
 
 void Ipv4Output::forward(Ipv4Header header, std::span<const std::byte> payload) {
 	if (header.ttl <= 1) {
-		// ICMP time exceeded
+		Icmp::send_time_exceeded(header, payload, *this);
 		return;
 	}
 
@@ -46,7 +47,7 @@ void Ipv4Output::transmit(Ipv4Header header, std::span<const std::byte> payload)
 	const auto route = router_.lookup(header.destination);
 
 	if (!route) {
-		// ICMP destination unreachable
+		Icmp::send_destination_unreachable(header, payload, 0, *this);
 		return;
 	}
 
@@ -54,8 +55,7 @@ void Ipv4Output::transmit(Ipv4Header header, std::span<const std::byte> payload)
 
 		const bool dont_fragment = (header.flags & 0b010) != 0;
 		if (dont_fragment) {
-			// ICMP fragmentation needed
-			// Throw?
+			Icmp::send_fragmentation_needed(header, payload, route->mtu, *this);
 			return;
 		} else {
 			const auto fragments = Fragmenter::fragment(header, payload, route->mtu);
@@ -83,7 +83,7 @@ void Ipv4Output::transmit(Ipv4Header header, std::span<const std::byte> payload)
 		(header.fragment_offset & 0x1FFF));
 
 	writer.write<std::uint8_t, std::uint8_t, std::uint16_t, std::uint32_t, std::uint32_t>(
-		header.ttl, header.protocol, header.checksum, header.source.raw(), header.destination.raw());
+		header.ttl, static_cast<std::uint8_t>(header.protocol), header.checksum, header.source.raw(), header.destination.raw());
 
 	auto packet = writer.move_data();
 
