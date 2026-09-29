@@ -46,7 +46,7 @@ std::optional<Ipv4Header> Ipv4Header::from_buffer(std::span<const std::byte> buf
 	header.fragment_offset = fragmentation & 0x1FFF;
 
 	header.ttl = reader.read<std::uint8_t>();
-	header.protocol = reader.read<std::uint8_t>();
+	header.protocol = static_cast<Protocol>(reader.read<std::uint8_t>());
 	header.checksum = reader.read<std::uint16_t>();
 	header.source = IPv4Address{ reader.read<std::uint32_t>() };
 	header.destination = IPv4Address{ reader.read<std::uint32_t>() };

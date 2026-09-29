@@ -9,10 +9,11 @@ std::vector<Packet> Fragmenter::fragment(const Ipv4Header &header, std::span<con
 		throw std::invalid_argument("MTU cannot hold IPv4 header");
 	}
 
-	const bool already_fragmented = header.fragment_offset != 0 || (header.flags & 0b001) != 0;
+	const auto original_offset = header.fragment_offset;
+	const bool original_has_more = (header.flags & 0b001) != 0;
 
-	if (already_fragmented) {
-		throw std::invalid_argument("re-fragmentation is not supported yet");
+	if (original_has_more && payload.size() % 8 != 0) {
+		throw std::invalid_argument("non-final fragment size must be divisible by eight");
 	}
 
 	const auto available = mtu - header.header_length();
@@ -35,11 +36,19 @@ std::vector<Packet> Fragmenter::fragment(const Ipv4Header &header, std::span<con
 
 		const std::size_t fragment_size = std::min(remaining, fragment_capacity);
 
-		const bool has_more = byte_offset + fragment_size < payload.size();
+		const bool has_more_children = byte_offset + fragment_size < payload.size();
+
+		const bool has_more = has_more_children || original_has_more;
+
+		const std::size_t new_offset = static_cast<std::size_t>(original_offset) + byte_offset / 8;
+
+		if (new_offset > 0x1FFF) {
+			throw std::invalid_argument("fragment offset exceeds IPv4 limit");
+		}
 
 		Ipv4Header fragment_header = header;
 
-		fragment_header.fragment_offset = static_cast<std::uint16_t>(byte_offset / 8);
+		fragment_header.fragment_offset = static_cast<std::uint16_t>(new_offset);
 		fragment_header.total_length = static_cast<std::uint16_t>(header.header_length() + fragment_size);
 		fragment_header.checksum = 0;
 
@@ -49,7 +58,9 @@ std::vector<Packet> Fragmenter::fragment(const Ipv4Header &header, std::span<con
 			fragment_header.flags &= ~0b001;
 		}
 
-		std::vector<std::byte> fragment_payload(payload.begin() + byte_offset, payload.begin() + byte_offset + fragment_size);
+		std::vector<std::byte> fragment_payload(
+			payload.begin() + byte_offset,
+			payload.begin() + byte_offset + fragment_size);
 
 		byte_offset += fragment_size;
 

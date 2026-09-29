@@ -5,6 +5,7 @@
 #include "util/BinaryWriter.hpp"
 #include "util/Checksum.hpp"
 #include <iostream>
+#include <algorithm>
 #include <vector>
 
 static std::vector<std::byte> make_reply(std::span<const std::byte> payload) {
@@ -38,8 +39,8 @@ static std::vector<std::byte> make_error(IcmpType type, std::uint8_t code, std::
 	auto message = writer.move_data();
 	const auto checksum = Checksum::compute(message);
 
-	message[2] = static_cast<std::byte>((checksum & 0x00FF) >> 8);
-	message[3] = static_cast<std::byte>((checksum & 0xFF00) >> 0);
+	message[2] = static_cast<std::byte>((checksum & 0xFF00) >> 8);
+	message[3] = static_cast<std::byte>((checksum & 0x00FF) >> 0);
 
 	return message;
 }

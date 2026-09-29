@@ -16,7 +16,7 @@ class Reassembler {
 	struct ReassemblerKey {
 		IPv4Address source;
 		IPv4Address destination;
-		std::uint8_t protocol;
+		Protocol protocol;
 		std::uint16_t id;
 
 		auto operator<=>(const ReassemblerKey &) const = default;

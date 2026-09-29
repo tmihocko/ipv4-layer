@@ -29,6 +29,6 @@ void Ipv4Input::process(std::span<const std::byte> packet) {
 		}
 
 	} else {
-		output_.forward(*header, payload);
+		output_.forward(*header, packet.first(header->total_length));
 	}
 }

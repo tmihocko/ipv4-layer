@@ -24,7 +24,7 @@ int main() {
 		.mtu = 1500,
 	});
 
-	std::byte buf[2000];
+	std::byte buf[65535];
 
 	while (true) {
 		auto n = tun.read(buf, sizeof(buf));

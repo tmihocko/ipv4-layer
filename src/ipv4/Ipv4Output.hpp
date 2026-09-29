@@ -17,7 +17,7 @@ class Ipv4Output {
 
   private:
 	// Actually sends the packet
-	void transmit(Ipv4Header header, std::span<const std::byte> payload);
+	void transmit(Ipv4Header header, std::span<const std::byte> payload, std::span<const std::byte> original_packet = {});
 
 	Router &router_;
 	TunDevice &tun_;

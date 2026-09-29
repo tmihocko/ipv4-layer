@@ -32,36 +32,43 @@ void Ipv4Output::send(IPv4Address destination, Protocol protocol, std::span<cons
 	transmit(header, payload);
 }
 
-void Ipv4Output::forward(Ipv4Header header, std::span<const std::byte> payload) {
+void Ipv4Output::forward(Ipv4Header header, std::span<const std::byte> original_packet) {
+	const auto payload = original_packet.subspan(header.header_length(), header.total_length - header.header_length());
+
 	if (header.ttl <= 1) {
-		Icmp::send_time_exceeded(header, payload, *this);
+		Icmp::send_time_exceeded(header, original_packet, *this);
 		return;
 	}
 
 	header.ttl--;
 
-	transmit(header, payload);
+	transmit(header, payload, original_packet);
 }
 
-void Ipv4Output::transmit(Ipv4Header header, std::span<const std::byte> payload) {
+void Ipv4Output::transmit(Ipv4Header header, std::span<const std::byte> payload, std::span<const std::byte> original_packet) {
 	const auto route = router_.lookup(header.destination);
 
 	if (!route) {
-		Icmp::send_destination_unreachable(header, payload, 0, *this);
+		if (!original_packet.empty()) {
+			Icmp::send_destination_unreachable(header, original_packet, 0, *this);
+		}
 		return;
 	}
 
 	if (header.total_length > route->mtu) {
-
 		const bool dont_fragment = (header.flags & 0b010) != 0;
+
 		if (dont_fragment) {
-			Icmp::send_fragmentation_needed(header, payload, route->mtu, *this);
+			if (!original_packet.empty()) {
+				Icmp::send_fragmentation_needed(header, original_packet, static_cast<std::uint16_t>(route->mtu), *this);
+			}
+
 			return;
 		} else {
 			const auto fragments = Fragmenter::fragment(header, payload, route->mtu);
 
 			for (const auto &fragment : fragments) {
-				transmit(fragment.header, fragment.payload);
+				transmit(fragment.header, fragment.payload, original_packet);
 			}
 
 			return;
